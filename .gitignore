@@ -1,0 +1,13 @@
+# Virtual Environment
+dbtvenv/
+
+# Ingestion folders
+ingestion/data/
+ingestion/logs/
+ingestion/__pycache__/
+
+# Python cache
+__pycache__/
+
+
+
