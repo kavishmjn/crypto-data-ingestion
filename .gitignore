@@ -1,13 +1,25 @@
 # Virtual Environment
 dbtvenv/
 
+#env file 
+.env
+
 # Ingestion folders
-ingestion/data/
-ingestion/logs/
+data/
+logs/
 ingestion/__pycache__/
+
 
 # Python cache
 __pycache__/
+
+
+#test file
+test.py
+
+
+
+
 
 
 

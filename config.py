@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 api_url = 'https://rest.coincap.io/v3/assets'
 api_key = os.getenv("COINCAP_API_KEY")
@@ -27,3 +30,12 @@ numeric_fields = [
     "rank","supply","maxSupply","marketCapUsd",
     "volumeUsd24Hr","priceUsd",
     "changePercent24Hr", "vwap24Hr"]# to check convertibilty later
+
+#DB Vars
+DB_CONFIG = {
+    "host": os.getenv("DB_HOST"),
+    "database": os.getenv("DB_NAME"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "port": os.getenv("DB_PORT"),
+}
