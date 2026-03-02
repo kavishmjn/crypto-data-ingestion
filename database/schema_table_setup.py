@@ -1,6 +1,6 @@
 from database.connection import get_connection
 import logging
-
+from config import csv_raw_mapping
 #----SETUP LOGGING
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,9 @@ def create_schema(schema_name: str) -> None:
         with get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(query)
+            conn.commit()
         print(f"Schema '{schema_name}' ensured.")
+
     except Exception as e:
         raise RuntimeError(f"Failed to create schema '{schema_name}': {e}")
 
@@ -23,27 +25,14 @@ def create_assets_table(schema_name: str) -> None:
     """
     Creates staging.assets table if not exists.
     """
-    query = f"""
-    CREATE TABLE IF NOT EXISTS {schema_name}.assets (
-        asset_id VARCHAR(50) PRIMARY KEY,
-        symbol VARCHAR(20),
-        name VARCHAR(100),
-        price_usd NUMERIC,
-        market_cap_usd NUMERIC,
-        volume_usd_24hr NUMERIC,
-        supply NUMERIC,
-        max_supply NUMERIC,
-        rank INTEGER,
-        last_updated TIMESTAMP,
-        batch_id VARCHAR(50),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    """
+    cols = [f"{key.upper()} {' '.join(v.upper() for v in values)}" for key, values in csv_raw_mapping.items()]
+    query = f"CREATE TABLE IF NOT EXISTS {schema_name}.ASSETS ({','.join(cols)})"
 
     try:
         with get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(query)
+        conn.commit()
         print(f"Table '{schema_name}.assets' ensured.")
     except Exception as e:
         raise RuntimeError(f"Failed to create table '{schema_name}.assets': {e}")

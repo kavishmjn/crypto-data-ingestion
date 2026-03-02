@@ -39,3 +39,25 @@ DB_CONFIG = {
     "password": os.getenv("DB_PASSWORD"),
     "port": os.getenv("DB_PORT"),
 }
+
+#CSV TO RAW TABLE MAPPING
+#asset_id,symbol,name,rank,supply,
+# max_supply,market_cap_usd,volume_usd_24hr,price_usd,
+# change_percent_24hr,vwap_24hr,data_pull_timestamp,ingestion_timestamp 
+#asset_id VARCHAR(50) PRIMARY KEY,
+
+csv_raw_mapping = {
+    'asset_id' : ['TEXT'],
+    'symbol' : ['TEXT'],
+    'name' : ['TEXT'],
+    'rank' : ['TEXT'],
+    'supply':['TEXT'],
+    'max_supply' : ['TEXT'],
+    'market_cap_usd': ['TEXT'],
+    'volume_usd_24hr':['TEXT'],
+    'price_usd':['TEXT'],
+    'change_percent_24hr':['TEXT'],
+    'vwap_24hr':['TEXT'],
+    'data_pull_timestamp':['TEXT'],
+    'ingestion_timestamp':['TEXT']    
+    }

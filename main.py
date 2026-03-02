@@ -2,6 +2,8 @@ from config import logs,data_folder
 import logging
 from ingestion.api_calls import fetch_assets
 from ingestion.store_data import store_raw_data,store_csv_data
+from database.schema_table_setup import create_assets_table,create_schema
+from database.load_data_in_raw_table import load_data
 import os
 from datetime import datetime, timezone
 from pathlib import Path
@@ -71,10 +73,23 @@ def  staging_csv_creation(batchid:str,raw_file:str|Path)->Path:
     logger.info(f'CSV file created : {csv_file}')
     return csv_file
 
+#---------LOADING DATA IN TABLE
+def load_data_in_postgres(batchid:str,csv_file,schema_name,table_name='assets')->None:
+    logger.info(F'Creating schema {schema_name}')
+    create_schema(schema_name)
+    logger.info(f'{schema_name} schema Created')
+    logger.info(f'Creating table {table_name} in schema {schema_name}')
+    create_assets_table(schema_name)
+    logger.info(f'{schema_name}.{table_name} table created')
+    logger.info(f'Loading Data from file to postgres db : {schema_name}.{table_name} for batch {batchid}')
+    load_data(csv_file,schema_name)
+    logger.info('Data loaded')
+
 
 if __name__ == "__main__":
     batchid = datetime.now(timezone.utc).strftime('%Y-%m-%d_%H-%M-%S')
     raw_file = ingestion(batchid)
     validation(batchid,raw_file)
-    staging_csv_creation(batchid,raw_file)
+    csv_file = staging_csv_creation(batchid,raw_file)
+    load_data_in_postgres(batchid,csv_file,'raw')
 
