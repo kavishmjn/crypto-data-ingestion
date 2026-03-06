@@ -1,0 +1,5 @@
+version: 2
+ 
+models: 
+    - name: assets_mart
+      description: latest price of crypto currency

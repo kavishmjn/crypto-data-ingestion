@@ -87,7 +87,7 @@ def load_data_in_postgres(batchid:str,csv_file,schema_name,table_name='assets')-
 
 
 if __name__ == "__main__":
-    batchid = datetime.now(timezone.utc).strftime('%Y-%m-%d_%H-%M-%S')
+    batchid = datetime.now(timezone.utc).strftime('%Y-%m-%d %H-%M-%S')
     raw_file = ingestion(batchid)
     validation(batchid,raw_file)
     csv_file = staging_csv_creation(batchid,raw_file)
