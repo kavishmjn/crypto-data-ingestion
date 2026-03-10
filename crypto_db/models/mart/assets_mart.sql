@@ -1,5 +1,3 @@
-{{ config(schema='mart') }}
-
 select *  from 
 (
     select *,row_number() over (partition by asset_id order by ingestion_timestamp desc) row_number
