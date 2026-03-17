@@ -1,0 +1,98 @@
+version: 2
+models:
+  # =========================
+  # DAILY METRICS MART
+  # =========================
+  - name: coin_daily_metrics
+    description: "Final mart combining OHLC, trend and volatility metrics per asset per day"
+    columns:
+      - name: asset_id
+        tests:
+          - not_null
+      - name: name
+        tests:
+          - not_null
+      - name: day
+        tests:
+          - not_null
+      - name: latest_ingestion_timestamp
+        tests:
+          - not_null
+      # OHLC
+      - name: open
+        tests:
+          - not_null
+      - name: high
+        tests:
+          - not_null
+      - name: low
+        tests:
+          - not_null
+      - name: close
+        tests:
+          - not_null
+      # Trend
+      - name: avg_price_1_day
+        tests:
+          - not_null
+      - name: avg_price_7_day
+        tests:
+          - not_null
+      # Volatility
+      - name: volatility_1d
+        tests:
+          - not_null
+      - name: volatility_7d
+        tests:
+          - not_null
+    tests:
+      # grain
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - asset_id
+            - day
+      # OHLC sanity
+      - dbt_utils.expression_is_true:
+          expression: "high >= low"
+      - dbt_utils.expression_is_true:
+          expression: "high >= open"
+      - dbt_utils.expression_is_true:
+          expression: "low <= close"
+      # price sanity
+      - dbt_utils.expression_is_true:
+          expression: "close >= 0"
+      # volatility sanity
+      - dbt_utils.expression_is_true:
+          expression: "volatility_1d >= 0"
+  # =========================
+  # TOP MOVERS MART
+  # =========================
+  - name: coin_top_movers
+    description: "Top gaining and losing coins based on price movement"
+    columns:
+      - name: asset_id
+        tests:
+          - not_null
+      - name: name
+        tests:
+          - not_null
+      - name: change_in_price
+        tests:
+          - not_null
+      - name: percentage_change_in_price
+        tests:
+          - not_null
+      - name: Gain_Lose
+        tests:
+          - not_null
+          - accepted_values:
+                values: ['Gain','Lose']
+      - name: position
+        tests:
+          - not_null
+    tests:
+      # sanity
+      - dbt_utils.expression_is_true:
+          expression: "change_in_price != 0"
+      - dbt_utils.expression_is_true:
+          expression: "position > 0"
