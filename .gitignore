@@ -22,3 +22,11 @@ test.py
 #dbt 
 crypto_db/.gitignore
 
+
+
+# Airflow
+logs/
+airflow.db
+airflow.cfg
+webserver_config.py
+

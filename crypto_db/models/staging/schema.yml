@@ -16,6 +16,7 @@ models:
         tests:
               - not_null
               - dbt_utils.expression_is_true:
+                  arguments:
                     expression: "> 0"
       - name: ingestion_timestamp
         description: "Timestamp when the data was loaded"

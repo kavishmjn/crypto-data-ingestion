@@ -3,7 +3,7 @@ models:
   # =========================
   # DAILY METRICS MART
   # =========================
-  - name: coin_daily_metrics
+  - name: coin_daily_market
     description: "Final mart combining OHLC, trend and volatility metrics per asset per day"
     columns:
       - name: asset_id
@@ -42,6 +42,9 @@ models:
       - name: volatility_1d
         tests:
           - not_null
+      - name: volatility_3d
+        tests: 
+           - not_null
       - name: volatility_7d
         tests:
           - not_null
@@ -64,6 +67,10 @@ models:
       # volatility sanity
       - dbt_utils.expression_is_true:
           expression: "volatility_1d >= 0"
+      - dbt_utils.expression_is_true:
+          expression: "volatility_3d >= 0"
+      - dbt_utils.expression_is_true:
+          expression: "volatility_7d >= 0"
   # =========================
   # TOP MOVERS MART
   # =========================
