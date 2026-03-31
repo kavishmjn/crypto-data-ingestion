@@ -13,7 +13,7 @@ def store_raw_data(data: dict, filename: str|Path) -> Path:
             with open(filename,'w',encoding='utf-8') as f:
                 json.dump(data,f,indent=4)
             logger.info(f"Data stored successfully at {filename}")
-            return Path(filename)  
+            return str(filename)  
         except Exception:
             logger.exception(f"Failed to write data to file: {filename}")
             raise 
