@@ -9,6 +9,8 @@ data/
 logs/
 ingestion/__pycache__/
 
+#pid
+*.pid
 
 # Python cache
 __pycache__/
@@ -29,4 +31,5 @@ logs/
 airflow.db
 airflow.cfg
 webserver_config.py
+
 
