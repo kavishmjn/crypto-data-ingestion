@@ -1,10 +1,13 @@
 from airflow import DAG
 from config import data_folder
+from airflow.models import Variable
 from airflow.operators.python import PythonOperator
+from airflow.operators.bash import BashOperator
 from ingestion.api_calls import fetch_assets
 from ingestion.store_data import store_raw_data, store_csv_data 
 from ingestion.validation import file_validation , data_level_validation , schema_level_validation
-from datetime import datetime, timezone
+from database.load_data_in_raw_table import load_data
+from datetime import datetime, timedelta, timezone
 import os 
 
 #task for storing raw data in json file
@@ -41,16 +44,38 @@ def store_csv_data_fxn(**context):
     csv_file_path = f'{csv_file_loc}/assets.csv'
     return store_csv_data(batch_id,raw_file_path,csv_file_path)
 
+#task for loading csv data into raw table in postgres
+def load_csv_to_db_fxn(**context):
+    # gathering all the necessary info from previous taks
+    ti = context['ti']
+    csv_file_path = ti.xcom_pull(task_ids = 'store_csv_data')
+    
+    #schema and table
+    schema = 'raw'
+    table = 'assets'
+    #fix how to call the load data fxn with 
+    DB_CONFIG = {
+    "host": Variable.get("DB_HOST"),
+    "database": Variable.get("DB_NAME"),
+    "user": Variable.get("DB_USER"),
+    "password": Variable.get("DB_PASSWORD"),
+    "port": Variable.get("DB_PORT")
+    }
+    load_data(csv_file=csv_file_path, schema_name='raw', table_name='assets', db_config=DB_CONFIG)
+   
 
 with DAG (
     'crypto_pipeline_v2',
     start_date=datetime(2024, 6, 1, tzinfo=timezone.utc),
     schedule_interval='0 */3 * * *',#run every 3 hours
-    catchup=False
+    catchup=False,
+    max_active_runs=1
 ) as dag:
     fetch_assets_task = PythonOperator(
         task_id='fetch_assets',
-        python_callable=fetch_assets)
+        python_callable=fetch_assets,
+        retries=3,
+        retry_delay=timedelta(seconds=30))
     define_batch_id = PythonOperator(
         task_id = 'define_batch_id',
         python_callable = lambda: datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
@@ -71,4 +96,12 @@ with DAG (
         task_id = 'store_csv_data',
         python_callable = store_csv_data_fxn
     )
-    define_batch_id >> fetch_assets_task >> store_raw_data_task >> validate_raw_data_task >> validate_data_schema_task >> store_csv_data_task   
+    load_csv_to_db_task = PythonOperator(
+        task_id = 'load_csv_to_db',
+        python_callable = load_csv_to_db_fxn
+    )
+    dbt_run = BashOperator(
+    task_id='dbt_run',
+    bash_command='cd /opt/airflow/crypto_db && dbt run --target docker --profiles-dir /home/airflow/.dbt 2>&1'
+    )
+    define_batch_id >> fetch_assets_task >> store_raw_data_task >> validate_raw_data_task >> validate_data_schema_task >> store_csv_data_task >> load_csv_to_db_task >> dbt_run
