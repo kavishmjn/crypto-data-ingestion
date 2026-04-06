@@ -4,11 +4,12 @@ import logging
 from pathlib import Path
 import csv
 from typing import Union
+from config import DB_CONFIG
 from datetime import datetime,timezone
 logger = logging.getLogger(__name__)
 
 
-def load_data(csv_file: Union[str, Path], schema_name: str, table_name: str = "assets") -> None:
+def load_data(csv_file: Union[str, Path], schema_name: str, table_name: str = "assets",db_config:dict = DB_CONFIG) -> None:
     """
     Loads CSV data into a Postgres table using execute_values.
     Append-only ingestion.
@@ -23,7 +24,7 @@ def load_data(csv_file: Union[str, Path], schema_name: str, table_name: str = "a
         data_pull_timestamp, ingestion_timestamp) VALUES %s"""
     timestamp =  datetime.now(timezone.utc).strftime('%Y-%m-%d %H-%M-%S')
     try:
-        with get_connection() as conn:
+        with get_connection(db_config) as conn:
             with conn.cursor() as curr:
                 with open(file_path, "r", encoding="utf-8") as f:
                     reader = csv.DictReader(f)

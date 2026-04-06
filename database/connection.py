@@ -7,11 +7,11 @@ import logging
 #----set up logger
 logger = logging.getLogger(__name__)
 
-def get_connection(config: Optional [Dict] = None) -> connection:
+def get_connection(config: Optional [Dict] = DB_CONFIG) -> connection:
     """
     Creates and returns a PostgreSQL database connection.
     """
-    db_config = config or DB_CONFIG
+    db_config = config 
     try:
         logger.info("Trying to connect to the Database")
         conn = psycopg2.connect(**db_config)
